@@ -7,7 +7,7 @@ function users
   w -h | cut -f1 -d' ' | sort -u 
 }
 
-while [[ "$SELECTION" != "exit" ]]
+while [[ "$SELECTION" != "Exit" ]]
 do
   PS3="Choose an option: "
   [[ "$SELECTION" != "" ]] && printf "\n\n"                    # Space if this isn't our first run
