@@ -26,6 +26,7 @@ do
           break;;
 
         "Get User's Processes")
+          printf "\n"
           USERLIST=$(users)
           PS3="Choose a user: " 
           select USERNAME in $USERLIST
