@@ -31,7 +31,7 @@ do
           PS3="Choose a user: " 
           select USERNAME in $USERLIST
           do
-            ps -u $USERNAME -U $USERNAME lax
+            ps -U $USERNAME l
             break
           done
           break;;
