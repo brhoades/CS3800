@@ -31,6 +31,7 @@ do
           PS3="Choose a user: " 
           select USERNAME in $USERLIST
           do
+            printf "\n"
             ps -U $USERNAME l
             break
           done
