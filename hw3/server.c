@@ -16,7 +16,7 @@ void *handleClient( void * );
 int main( )
 {
   pthread_t threads[MAX_CLIENTS];
-  long numClients;
+  long numClients=0;
   int sock, clilen;
   long newclient;
   struct sockaddr_in server_addr;
@@ -49,7 +49,7 @@ int main( )
   while( 1 )
   {
     // sleep and wait for excitement
-    printf( "Waiting for connections.\n" );
+    printf( "Waiting for connections...\n" );
     listen( sock, 5 );
     clilen = sizeof( client_addr );
 
@@ -61,6 +61,8 @@ int main( )
       printf( "Thread creation failure.\n" );
       exit( 2 );
     }
+    else
+      printf( "Spawned new handler thread.\n" ); 
     numClients++;
   }
 
@@ -93,6 +95,8 @@ void *handleClient( void * clientNumber )
     perror( "Failed to write to socket" );
     exit( 1 );
   }
+
+  pthread_exit( NULL );
 
   return NULL;
 }

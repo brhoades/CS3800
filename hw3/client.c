@@ -66,7 +66,7 @@ int main( int argc, char* argv[] )
  
     while( scanf("%s", &buf) ) 
     { 
-     write(sd, buf, sizeof(buf)); 
+      write(sd, buf, sizeof(buf)); 
       read(sd, buf, sizeof(buf)); 
       printf("SERVER ECHOED: %s\n", buf); 
     } 
