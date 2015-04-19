@@ -1,56 +1,73 @@
-/*******************************************************************************************************/
-/*   PROGRAM: server-template for the assignment                                                           */
-/*                                                                                                                                            */
-/*   Using socket() to create an endpoint for communication. It returns socket descriptor    */
-/*   Using bind() to bind/assign a name to an unnamed socket.                                            */
-/*   Using listen() to listen for connections on a socket. Using accept() to accept                 */
-/*   a connection on a socket.  It returns the descriptor for the accepted socket                   */
-/*                                                                                                                                            */
-/*   gcc -o server server.c -lpthread -D_REENTRANT                                                           */
-/*                                                                                                                                            */
-/*******************************************************************************************************/
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>  /* define socket */
+#include <netinet/in.h>  /* define internet socket */
+#include <netdb.h>       /* define internet socket */
 
-int FDarray[MAX_CLIENT]   /* allocate as many file descriptors 
-                             as the number of clients  */
-int counter; mutex m;
+#define SERVER_PORT 9999        /* define a server port number */
+
+int main( )
 {
-   socket
-   bind
+  int sock;
+  int clilen;
+  struct sockaddr_in server_addr;
+  struct sockaddr_in client_addr;
+  int res;
 
-   listen(n)   /* n is the size of the queue that holds incoming requests
-                  from clients that want to connect  */
+  char buffer[256];
 
-   while(( someint = accept(socket)) > 0)
-   {  
-      lock(m);
-      FD[counter++] = someint;   /* first check for room here though */
-      unlock(m);
-      thr_create(bob, someint, ....)  
-   }
+  sock = socket( AF_INET, SOCK_STREAM, 0 ); 
 
-   close stuff ...
+  // Create a socket and check output for success
+  if( sock == -1 )
+  {
+    perror( "Socket failed to open" );
+    exit( 1 );
+  }
 
-}
+   /* Initialize socket structure */
+   //bzero( (char *) &server_addr, sizeof( server_addr ) );
+   
+   server_addr.sin_family = AF_INET;
+   server_addr.sin_addr.s_addr = INADDR_ANY;
+   server_addr.sin_port = htons( SERVER_PORT );
 
-void bob(void* arg)    /* what does 'bob' do ? */
-{
-   get  fd;
-
-   get the host name;
-   read in client name;
-   print a message about the new client;
-
-   while ((read(FD, buf)) > 0)
+   /* Now bind the host address using bind() call.*/
+   if( bind( sock, (struct sockaddr *) &server_addr, sizeof( server_addr ) ) < 0 )
    {
-      lock(m)
-      loop
-        write message to each FD
-      unlock(m)          
+     perror( "Failed to bind to address" );
+     exit( 1 );
    }
+
+  // sleep and wait for excitement
+  printf( "Waiting for connections.\n" );
+  listen( sock, 5 );
+  clilen = sizeof( client_addr );
+
+
+  // Accept...
+  sock = accept( sock, (struct sockaddr*)&client_addr, &clilen );
+  res = read( sock, buffer, 255 );
+
+  if( res < 0 )
+  {
+    perror( "Failed to read from socket" );
+    exit( 1 );
+  }
+
+  sprintf( "This is a test: %s\n", buffer );
+
+  // and respond
   
-   lock(m);
-   remove myself from FDarray
-   unlock(m) 
-   close(FD)
-   thr_exit()
+  res = write( sock, "Message received", 18 );
+
+  if( res < 0 )
+  {
+    perror( "Failed to write to socket" );
+    exit( 1 );
+  }
+      
+  return 0;
 }
