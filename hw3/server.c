@@ -84,7 +84,7 @@ void *handleClient( void * clientNumber )
     exit( 1 );
   }
 
-  sprintf( "This is a test: %s\n", buffer );
+  printf( "This is a test: %s\n", buffer );
 
   // and respond
   
