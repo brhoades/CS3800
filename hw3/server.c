@@ -1,22 +1,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <pthread.h>
 #include <sys/types.h>
 #include <sys/socket.h>  /* define socket */
 #include <netinet/in.h>  /* define internet socket */
 #include <netdb.h>       /* define internet socket */
 
 #define SERVER_PORT 9999        /* define a server port number */
+#define MAX_CLIENTS 10
+
+//void chatListen( );
+void *handleClient( void * );
 
 int main( )
 {
-  int sock;
-  int clilen;
+  pthread_t threads[MAX_CLIENTS];
+  long numClients;
+  int sock, clilen;
+  long newclient;
   struct sockaddr_in server_addr;
   struct sockaddr_in client_addr;
   int res;
-
-  char buffer[256];
 
   sock = socket( AF_INET, SOCK_STREAM, 0 ); 
 
@@ -41,14 +46,34 @@ int main( )
      exit( 1 );
    }
 
-  // sleep and wait for excitement
-  printf( "Waiting for connections.\n" );
-  listen( sock, 5 );
-  clilen = sizeof( client_addr );
+  while( 1 )
+  {
+    // sleep and wait for excitement
+    printf( "Waiting for connections.\n" );
+    listen( sock, 5 );
+    clilen = sizeof( client_addr );
 
 
-  // Accept...
-  sock = accept( sock, (struct sockaddr*)&client_addr, &clilen );
+    // Accept...
+    newclient = accept( sock, (struct sockaddr*)&client_addr, &clilen );
+    if( pthread_create( &threads[numClients], NULL, handleClient, (void *)newclient ) ) 
+    {
+      printf( "Thread creation failure.\n" );
+      exit( 2 );
+    }
+    numClients++;
+  }
+
+  pthread_exit( NULL );
+  return 0;
+}
+
+void *handleClient( void * clientNumber )
+{
+  char buffer[256];
+  long sock = (long)clientNumber;
+  int res;
+
   res = read( sock, buffer, 255 );
 
   if( res < 0 )
@@ -68,6 +93,6 @@ int main( )
     perror( "Failed to write to socket" );
     exit( 1 );
   }
-      
-  return 0;
+
+  return NULL;
 }
