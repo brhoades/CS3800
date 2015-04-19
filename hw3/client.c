@@ -68,7 +68,7 @@ int main( int argc, char* argv[] )
     { 
       write(sd, buf, sizeof(buf)); 
       read(sd, buf, sizeof(buf)); 
-      printf("SERVER ECHOED: %s\n", buf); 
+      printf("SERVER: %s\n", buf); 
     } 
  
     close(sd); 

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <pthread.h>
 #include <sys/types.h>
 #include <sys/socket.h>  /* define socket */
@@ -13,38 +14,26 @@
 //void chatListen( );
 void *handleClient( void * );
 
+int setupSocket( );
+
+// locks for thread positions
+volatile char running[MAX_CLIENTS];
+pthread_mutex_t running_lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_t threads[MAX_CLIENTS];
+
 int main( )
 {
-  pthread_t threads[MAX_CLIENTS];
   long numClients=0;
   int sock, clilen;
   long newclient;
-  struct sockaddr_in server_addr;
   struct sockaddr_in client_addr;
-  int res;
+  int res, i;
 
-  sock = socket( AF_INET, SOCK_STREAM, 0 ); 
+  // Show all clients as available
+  for( i=0; i<MAX_CLIENTS; i++ )
+    running[i] = 0;
 
-  // Create a socket and check output for success
-  if( sock == -1 )
-  {
-    perror( "Socket failed to open" );
-    exit( 1 );
-  }
-
-   /* Initialize socket structure */
-   //bzero( (char *) &server_addr, sizeof( server_addr ) );
-   
-   server_addr.sin_family = AF_INET;
-   server_addr.sin_addr.s_addr = INADDR_ANY;
-   server_addr.sin_port = htons( SERVER_PORT );
-
-   /* Now bind the host address using bind() call.*/
-   if( bind( sock, (struct sockaddr *) &server_addr, sizeof( server_addr ) ) < 0 )
-   {
-     perror( "Failed to bind to address" );
-     exit( 1 );
-   }
+  sock = setupSocket( );
 
   while( 1 )
   {
@@ -72,31 +61,63 @@ int main( )
 
 void *handleClient( void * clientNumber )
 {
-  char buffer[256];
   long sock = (long)clientNumber;
-  int res;
 
-  res = read( sock, buffer, 255 );
-
-  if( res < 0 )
+  while( 1 )
   {
-    perror( "Failed to read from socket" );
-    exit( 1 );
-  }
+    char buffer[256];
+    int res = read( sock, buffer, sizeof(buffer) ); 
 
-  printf( "This is a test: %s\n", buffer );
+    if( res < 0 )
+    {
+      perror( "Failed to read from socket" );
+      pthread_exit( NULL );
+      return NULL;
+    }
+    else if( strlen( buffer ) == 0 )
+      continue;
 
-  // and respond
-  
-  res = write( sock, "Message received", 18 );
+    printf( "Client %i: \"%s\"\n", sock, buffer );
 
-  if( res < 0 )
-  {
-    perror( "Failed to write to socket" );
-    exit( 1 );
+    // and respond
+    
+    res = write( sock, "Message received", sizeof("Message received") );
+
+    if( res < 0 )
+    {
+      perror( "Failed to write to socket" );
+      pthread_exit( NULL );
+      return NULL;
+    }
   }
 
   pthread_exit( NULL );
-
   return NULL;
+}
+
+int setupSocket( )
+{
+  int sock = socket( AF_INET, SOCK_STREAM, 0 ); 
+  struct sockaddr_in server_addr;
+
+  // Create a socket and check output for success
+  if( sock == -1 )
+  {
+    perror( "Socket failed to open" );
+    exit( 1 );
+  }
+
+  /* Initialize socket structure */
+  server_addr.sin_family = AF_INET;
+  server_addr.sin_addr.s_addr = INADDR_ANY;
+  server_addr.sin_port = htons( SERVER_PORT );
+
+  /* Now bind the host address using bind() call.*/
+  if( bind( sock, (struct sockaddr *) &server_addr, sizeof( server_addr ) ) < 0 )
+  {
+    perror( "Failed to bind to address" );
+    exit( 1 );
+  }
+
+  return sock;
 }

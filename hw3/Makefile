@@ -1,5 +1,5 @@
 CXX=/usr/bin/clang
-CFLAGS=-lnsl -g
+CFLAGS=-lnsl -g -Lcsp -Wall
 
 default: all
 
