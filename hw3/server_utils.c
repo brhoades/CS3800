@@ -44,7 +44,7 @@ inline void new_client( const int sock )
     exit( 3 );
   }
 
-  packed[0] = i;
+  packed[0] = (long)i;
   packed[1] = accept( sock, (struct sockaddr*)&client_addr, &clilen );
   //FIXME: lock
   sockets[i] = packed[1];
@@ -75,6 +75,8 @@ inline void dispatch( const int source, const char* msg )
 
 inline void client_quit( const int clientNum )
 {
+  printf( "Client #%i quit\n", clientNum );
+  dispatch( "Client #%i quit\n", clientNum );
   //FIXME: lock
   running[clientNum] = 0;
   pthread_exit( NULL );
