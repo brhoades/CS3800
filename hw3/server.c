@@ -8,15 +8,17 @@
 #include <netinet/in.h>  /* define internet socket */
 #include <netdb.h>       /* define internet socket */
 
+#include "server_utils.h"
+
 #define SERVER_PORT 9999        /* define a server port number */
 #define MAX_CLIENTS 10
 
-//void chatListen( );
 void *handleClient( void * );
 
 int setupSocket( );
 
 // locks for thread positions
+// UNUSED
 volatile char running[MAX_CLIENTS];
 pthread_mutex_t running_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_t threads[MAX_CLIENTS];
@@ -78,15 +80,7 @@ void *handleClient( void * clientNumber )
     printf( "Client %i: \"%s\"\n", sock, buffer );
 
     // and respond
-    
-    res = write( sock, "Message received", sizeof("Message received") );
-
-    if( res < 0 )
-    {
-      perror( "Failed to write to socket" );
-      pthread_exit( NULL );
-      return NULL;
-    }
+    write_client( sock, "/ACK" );
   }
 
   pthread_exit( NULL );
