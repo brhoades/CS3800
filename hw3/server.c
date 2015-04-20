@@ -9,12 +9,12 @@ int main( )
 
   sock = setupSocket( );
 
+  // sleep and wait for excitement
+  printf( "Waiting for connections...\n" );
+
   while( 1 )
   {
-    // sleep and wait for excitement
-    printf( "Waiting for connections...\n" );
     listen( sock, 5 );
-
     new_client( sock );
   }
 
@@ -39,7 +39,7 @@ void *handleClient( void * packed )
       return NULL;
     }
 
-    printf( "Client %i: \"%s\"\n", sock, buffer );
+    printf( "Client %i: \"%s\"\n", clientNum + 1, buffer );
 
     if( !strcmp( buffer, "/quit" ) )
       client_quit( clientNum );
@@ -48,7 +48,7 @@ void *handleClient( void * packed )
     write_client( sock, "/ACK" );
 
     // and tell everyone else
-    dispatch( sock, buffer );
+    dispatch( clientNum, buffer );
   }
 
   client_quit( clientNum );

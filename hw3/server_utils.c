@@ -46,6 +46,8 @@ inline void new_client( const int sock )
 
   packed[0] = i;
   packed[1] = accept( sock, (struct sockaddr*)&client_addr, &clilen );
+  //FIXME: lock
+  sockets[i] = packed[1];
   if( pthread_create( &threads[i], NULL, handleClient, (void *)packed ) ) 
   {
     printf( "Thread creation failure.\n" );
@@ -53,6 +55,8 @@ inline void new_client( const int sock )
   }
   else
     printf( "New client #%i connected\n", i + 1 ); 
+
+  running[i] = 1;
 } 
 
 inline void dispatch( const int source, const char* msg )
@@ -61,13 +65,17 @@ inline void dispatch( const int source, const char* msg )
 
   for( i=0; i<MAX_CLIENTS; i++ )
   {
-    if( running[i] )
+    if( running[i] && i != source )
+    {
+      printf( "Writing to %i socket (%i)\n", i, sockets[i] );
       write_client( sockets[i], msg );
+    }
   }
 }
 
-inline void client_quit( const int sock )
+inline void client_quit( const int clientNum )
 {
-
+  //FIXME: lock
+  running[clientNum] = 0;
   pthread_exit( NULL );
 }
