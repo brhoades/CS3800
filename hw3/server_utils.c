@@ -29,7 +29,7 @@ inline void new_client( const int sock )
 {
   struct sockaddr_in client_addr;
   int clilen = sizeof( client_addr ), i;
-  long packed[2];
+  int packed[2];
 
   for( i=0; i<MAX_CLIENTS; i++ )
   {

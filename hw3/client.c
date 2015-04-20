@@ -81,6 +81,7 @@ void runCLI( )
   int num = 0, c = -1;
   int parent_x, parent_y;
   int score_size = 3;
+  int received = 0;
   char buff[256], inputbuff[256];
 
   //don't block
@@ -92,7 +93,7 @@ void runCLI( )
 
   (void) initscr();      /* initialize the curses library */
   keypad(stdscr, TRUE);  /* enable keyboard mapping */
-  (void) nonl();         /* tell curses not to do NL->CR/NL on output */
+  //(void) nonl();         /* tell curses not to do NL->CR/NL on output */
   (void) cbreak();       /* take input chars one at a time, no wait for \n */
   (void) echo();         /* echo input - in color */
   timeout(-1);
@@ -135,8 +136,7 @@ void runCLI( )
     mvwprintw(input, 0, 0, "Input");
     attrset(COLOR_PAIR(num % 8));
     
-    //clear windows
-    wclear( mainbox );
+    //clear input
     wclear( input );
 
     draw_borders( mainbox );
@@ -144,7 +144,7 @@ void runCLI( )
 
     if( c != -1 )
     {
-      if( c == KEY_DOWN )
+      if( c == '\n' )
       {
     //FIXME: we should see our own message on completion
         /*
@@ -194,7 +194,9 @@ void runCLI( )
     read(sock, inputbuff, sizeof(inputbuff)); 
     if( strlen( inputbuff ) > 0 )
     {
-      mvwprintw(mainbox, 1, 2, "msg: '%s' (%i)", inputbuff, strlen(buff));
+      mvwprintw(mainbox, 1+received, 2, "msg: '%s' (%i)", inputbuff);
+      received++;
+      inputbuff[0]='\0';
     }
     else
     {

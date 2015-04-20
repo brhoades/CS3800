@@ -24,8 +24,8 @@ int main( )
 
 void *handleClient( void * packed )
 {
-  long clientNum = ((long*)packed)[0];
-  long sock = ((long*)packed)[1];
+  int clientNum = ((int*)packed)[0];
+  int sock = ((int*)packed)[1];
 
   while( 1 )
   {
@@ -45,7 +45,7 @@ void *handleClient( void * packed )
       client_quit( clientNum );
 
     // and respond
-    write_client( sock, "/ACK" );
+    //write_client( sock, "/ACK" );
 
     // and tell everyone else
     dispatch( clientNum, buffer );
