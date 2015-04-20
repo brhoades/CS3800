@@ -30,7 +30,6 @@ void runCLI( );
 static void finish(int sig);
 int sock=-1;
 #define SERVER_PORT 9999     /* define a server port number */ 
-#define KEY_ENTER 0x157
  
 int main( int argc, char* argv[] ) 
 { 
@@ -119,6 +118,8 @@ void runCLI( )
   // set up initial windows
   WINDOW *mainbox = newwin(parent_y - score_size, parent_x, 0, 0);
   WINDOW *input = newwin(score_size, parent_x, parent_y - score_size, 0);
+  keypad(input, TRUE);  /* enable keyboard mapping */
+  keypad(mainbox, TRUE);  /* enable keyboard mapping */
 
   strcpy( buff, "" );
 
@@ -138,7 +139,7 @@ void runCLI( )
 
     if( c != -1 )
     {
-      if( c == KEY_ENTER )
+      if( c == KEY_DOWN )
       {
         /*
         while( 1 ) 
@@ -152,6 +153,7 @@ void runCLI( )
             read(soc, buff, sizeof(buff)); 
             printf("SERVER: %s\n", buff); 
           }
+        }
           */
         buff[num+1] = '\0';
         write( sock, buff, sizeof(buff) );
@@ -186,7 +188,7 @@ void runCLI( )
     wrefresh(mainbox);
     wrefresh(input);
   }
-  while( ( c = getch( ) ) );
+  while( ( c = wgetch( input ) ) );
 
   // clean up
   delwin(mainbox);
