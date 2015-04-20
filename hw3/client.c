@@ -66,7 +66,7 @@ int main( int argc, char* argv[] )
 
     while( 1 ) 
     { 
-      int res = scanf("%s", &buf); 
+      int res = scanf(" %[^\n]", &buf); 
       if( res <= 0 )
         break;
       else
