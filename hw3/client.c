@@ -69,21 +69,8 @@ int main( int argc, char* argv[] )
     printf("connect() successful! will send a message to server\n"); 
     printf("Input a string:\n" ); 
 
-    //runCLI( );
+    runCLI( );
 
-    while( 1 ) 
-    { 
-      int res = scanf(" %[^\n]", &buf); 
-      if( res <= 0 )
-        break;
-      else
-      {
-        write(sd, buf, sizeof(buf)); 
-        read(sd, buf, sizeof(buf)); 
-        printf("SERVER: %s\n", buf); 
-      }
-    } 
- 
     close(sd); 
     return(0); 
 } 
@@ -93,6 +80,7 @@ void runCLI( )
   int num = 0;
   int parent_x, parent_y;
   int score_size = 3;
+  int c = 0;
 
   /* initialize your non-curses data structures here */
 
@@ -131,30 +119,26 @@ void runCLI( )
   WINDOW *mainbox = newwin(parent_y - score_size, parent_x, 0, 0);
   WINDOW *input = newwin(score_size, parent_x, parent_y - score_size, 0);
 
-  draw_borders( mainbox );
-  draw_borders( input );
+  do
+  {
+    // draw to our windows
+    mvwprintw(mainbox, 0, 0, "Chat");
+    mvwprintw(input, 0, 0, "Input");
+    attrset(COLOR_PAIR(num % 8));
+    draw_borders( mainbox );
+    draw_borders( input );
 
-  // draw to our windows
-  mvwprintw(mainbox, 0, 0, "Chat");
-  mvwprintw(input, 0, 0, "Input");
-
-  // refresh each window
-  wrefresh(mainbox);
-  wrefresh(input);
-  sleep(5);
+    mvwprintw(input, 1, num+1, "%c", c);
+    num++;
+    // refresh each window
+    wrefresh(mainbox);
+    wrefresh(input);
+  }
+  while( c = getch( ) );
 
   // clean up
   delwin(mainbox);
   delwin(input);
-
-  while( 1 )
-  {
-    int c = getch();     /* refresh, accept single keystroke of input */
-    attrset(COLOR_PAIR(num % 8));
-    num++;
-
-    /* process the command keystroke */
-  }
 
   finish(0);
 } 
