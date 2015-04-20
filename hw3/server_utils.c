@@ -54,7 +54,9 @@ inline void new_client( const int sock )
     exit( 2 );
   }
   else
-    printf( "New client #%i connected\n", i + 1 ); 
+    printf( "New client #%i (sock: %i) connected\n", i + 1, sockets[i] ); 
+
+  write_client( sockets[i], "Welcome\n" );
 
   running[i] = 1;
 } 
@@ -67,7 +69,7 @@ inline void dispatch( const int source, const char* msg )
   {
     if( running[i] && i != source )
     {
-      printf( "Writing to %i socket (%i)\n", i, sockets[i] );
+      printf( "Writing \"%s\" to %i's socket (%i)\n", msg, i+1, sockets[i] );
       write_client( sockets[i], msg );
     }
   }

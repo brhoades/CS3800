@@ -24,6 +24,7 @@
 #include <netdb.h>       /* define internet socket */ 
 #include <curses.h>
 #include <signal.h>
+#include <fcntl.h>
 
 void draw_borders(WINDOW *screen);
 void runCLI( );
@@ -80,7 +81,10 @@ void runCLI( )
   int num = 0, c = -1;
   int parent_x, parent_y;
   int score_size = 3;
-  char buff[256];
+  char buff[256], inputbuff[256];
+
+  //don't block
+  fcntl(sock, F_SETFL, O_NONBLOCK);
 
   /* initialize your non-curses data structures here */
 
@@ -91,6 +95,7 @@ void runCLI( )
   (void) nonl();         /* tell curses not to do NL->CR/NL on output */
   (void) cbreak();       /* take input chars one at a time, no wait for \n */
   (void) echo();         /* echo input - in color */
+  timeout(-1);
 
   if (has_colors())
   {
@@ -141,6 +146,7 @@ void runCLI( )
     {
       if( c == KEY_DOWN )
       {
+    //FIXME: we should see our own message on completion
         /*
         while( 1 ) 
         { 
@@ -185,6 +191,15 @@ void runCLI( )
 
     mvwprintw(input, 1, 2, "%s (%i/%i)", buff, num, strlen(buff));
     // refresh each window
+    read(sock, inputbuff, sizeof(inputbuff)); 
+    if( strlen( inputbuff ) > 0 )
+    {
+      mvwprintw(mainbox, 1, 2, "msg: '%s' (%i)", inputbuff, strlen(buff));
+    }
+    else
+    {
+      //mvwprintw(mainbox, 1, 2, "msg: '%s'", inputbuff);
+    }
     wrefresh(mainbox);
     wrefresh(input);
   }
