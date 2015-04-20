@@ -74,8 +74,6 @@ void *handleClient( void * clientNumber )
       pthread_exit( NULL );
       return NULL;
     }
-    else if( strlen( buffer ) == 0 )
-      continue;
 
     printf( "Client %i: \"%s\"\n", sock, buffer );
 

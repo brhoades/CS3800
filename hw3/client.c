@@ -29,7 +29,7 @@ int main( int argc, char* argv[] )
 { 
     int sd; 
     struct sockaddr_in server_addr = { AF_INET, htons( SERVER_PORT ) }; 
-    char buf[512]; 
+    char buf[256]; 
     struct hostent *hp; 
  
     if( argc != 2 ) 
@@ -63,12 +63,18 @@ int main( int argc, char* argv[] )
  
     printf("connect() successful! will send a message to server\n"); 
     printf("Input a string:\n" ); 
- 
-    while( scanf("%s", &buf) ) 
+
+    while( 1 ) 
     { 
-      write(sd, buf, sizeof(buf)); 
-      read(sd, buf, sizeof(buf)); 
-      printf("SERVER: %s\n", buf); 
+      int res = scanf("%s", &buf); 
+      if( res <= 0 )
+        break;
+      else
+      {
+        write(sd, buf, sizeof(buf)); 
+        read(sd, buf, sizeof(buf)); 
+        printf("SERVER: %s\n", buf); 
+      }
     } 
  
     close(sd); 
