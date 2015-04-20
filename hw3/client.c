@@ -28,11 +28,12 @@
 void draw_borders(WINDOW *screen);
 void runCLI( );
 static void finish(int sig);
+int sock=-1;
 #define SERVER_PORT 9999     /* define a server port number */ 
+#define KEY_ENTER 0x157
  
 int main( int argc, char* argv[] ) 
 { 
-    int sd; 
     struct sockaddr_in server_addr = { AF_INET, htons( SERVER_PORT ) }; 
     char buf[256]; 
     struct hostent *hp; 
@@ -52,14 +53,14 @@ int main( int argc, char* argv[] )
     bcopy( hp->h_addr_list[0], (char*)&server_addr.sin_addr, hp->h_length ); 
  
     /* create a socket */ 
-    if( ( sd = socket( AF_INET, SOCK_STREAM, 0 ) ) == -1 ) 
+    if( ( sock = socket( AF_INET, SOCK_STREAM, 0 ) ) == -1 ) 
     { 
       perror( "client: socket failed" ); 
       exit( 1 ); 
     } 
  
     /* connect a socket */ 
-    if( connect( sd, (struct sockaddr*)&server_addr, 
+    if( connect( sock, (struct sockaddr*)&server_addr, 
      sizeof(server_addr) ) == -1 ) 
     { 
       perror( "client: connect FAILED:" ); 
@@ -71,16 +72,16 @@ int main( int argc, char* argv[] )
 
     runCLI( );
 
-    close(sd); 
+    close(sock); 
     return(0); 
 } 
 
 void runCLI( )
 {
-  int num = 0;
+  int num = 0, c = -1;
   int parent_x, parent_y;
   int score_size = 3;
-  int c = 0;
+  char buff[256];
 
   /* initialize your non-curses data structures here */
 
@@ -119,22 +120,73 @@ void runCLI( )
   WINDOW *mainbox = newwin(parent_y - score_size, parent_x, 0, 0);
   WINDOW *input = newwin(score_size, parent_x, parent_y - score_size, 0);
 
+  strcpy( buff, "" );
+
   do
   {
     // draw to our windows
     mvwprintw(mainbox, 0, 0, "Chat");
     mvwprintw(input, 0, 0, "Input");
     attrset(COLOR_PAIR(num % 8));
+    
+    //clear windows
+    wclear( mainbox );
+    wclear( input );
+
     draw_borders( mainbox );
     draw_borders( input );
 
-    mvwprintw(input, 1, num+1, "%c", c);
-    num++;
+    if( c != -1 )
+    {
+      if( c == KEY_ENTER )
+      {
+        /*
+        while( 1 ) 
+        { 
+          int res = scanf(" %[^\n]", &buf); 
+          if( res <= 0 )
+            break;
+          else
+          {
+            write(sock, buff, sizeof(buff)); 
+            read(soc, buff, sizeof(buff)); 
+            printf("SERVER: %s\n", buff); 
+          }
+          */
+        buff[num+1] = '\0';
+        write( sock, buff, sizeof(buff) );
+        // GET ACK
+        num = 0;
+        buff[0] = '\0';
+      }
+      else if( c == KEY_BACKSPACE )
+      {
+        if( num > 0 )
+        {
+          buff[num] = '\0';
+          num--;
+        }
+      }
+      else if( num >= 254 )
+      {
+        buff[254] = c;
+        buff[255] = '\0';
+        num = 254;
+      }
+      else
+      {
+        buff[num] = c;
+        num++;
+        buff[num] = '\0';
+      }
+    }
+
+    mvwprintw(input, 1, 2, "%s (%i/%i)", buff, num, strlen(buff));
     // refresh each window
     wrefresh(mainbox);
     wrefresh(input);
   }
-  while( c = getch( ) );
+  while( ( c = getch( ) ) );
 
   // clean up
   delwin(mainbox);
