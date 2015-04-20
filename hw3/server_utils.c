@@ -18,7 +18,7 @@ inline void startup_accounting( )
 
 inline void write_client( const int sock, const char* msg )
 {
-  if( write( sock, msg, sizeof(msg) ) < 0 )
+  if( write( sock, msg, sizeof(msg) ) <= 0 )
   {
     perror( "Failed to write to socket" );
     pthread_exit( NULL );
@@ -78,7 +78,7 @@ inline void dispatch( const int source, const char* msg )
 inline void client_quit( const int clientNum )
 {
   printf( "Client #%i quit\n", clientNum );
-  dispatch( "Client #%i quit\n", clientNum );
+  dispatch( clientNum, sprintf( "Client #%i quit\n", clientNum ) );
   //FIXME: lock
   running[clientNum] = 0;
   pthread_exit( NULL );
