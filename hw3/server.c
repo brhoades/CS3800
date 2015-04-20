@@ -32,9 +32,12 @@ void *handleClient( void * packed )
     char buffer[256];
     int res = read( sock, buffer, sizeof(buffer) ); 
 
-    if( res < 0 )
+    if( res <= 0 )
     {
-      perror( "Failed to read from socket" );
+      if( res != 0 )
+        perror( "Failed to read from socket" );
+      else
+        perror( "Client closed the connection" );
       client_quit( clientNum );
       return NULL;
     }
