@@ -1,39 +1,11 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <pthread.h>
-#include <sys/types.h>
-#include <sys/socket.h>  /* define socket */
-#include <netinet/in.h>  /* define internet socket */
-#include <netdb.h>       /* define internet socket */
+#include "server.h"
 
-#include "server_utils.h"
-
-#define SERVER_PORT 9999        /* define a server port number */
-#define MAX_CLIENTS 10
-
-void *handleClient( void * );
-
-int setupSocket( );
-
-// locks for thread positions
-// UNUSED
-volatile char running[MAX_CLIENTS];
-pthread_mutex_t running_lock = PTHREAD_MUTEX_INITIALIZER;
-pthread_t threads[MAX_CLIENTS];
-
+// This thread becomes a listner
 int main( )
 {
-  long numClients=0;
-  int sock, clilen;
-  long newclient;
-  struct sockaddr_in client_addr;
-  int res, i;
+  int sock;
 
-  // Show all clients as available
-  for( i=0; i<MAX_CLIENTS; i++ )
-    running[i] = 0;
+  startup_accounting( );
 
   sock = setupSocket( );
 
@@ -42,28 +14,18 @@ int main( )
     // sleep and wait for excitement
     printf( "Waiting for connections...\n" );
     listen( sock, 5 );
-    clilen = sizeof( client_addr );
 
-
-    // Accept...
-    newclient = accept( sock, (struct sockaddr*)&client_addr, &clilen );
-    if( pthread_create( &threads[numClients], NULL, handleClient, (void *)newclient ) ) 
-    {
-      printf( "Thread creation failure.\n" );
-      exit( 2 );
-    }
-    else
-      printf( "Spawned new handler thread.\n" ); 
-    numClients++;
+    new_client( sock );
   }
 
   pthread_exit( NULL );
   return 0;
 }
 
-void *handleClient( void * clientNumber )
+void *handleClient( void * packed )
 {
-  long sock = (long)clientNumber;
+  long clientNum = ((long*)packed)[0];
+  long sock = ((long*)packed)[1];
 
   while( 1 )
   {
@@ -73,17 +35,23 @@ void *handleClient( void * clientNumber )
     if( res < 0 )
     {
       perror( "Failed to read from socket" );
-      pthread_exit( NULL );
+      client_quit( clientNum );
       return NULL;
     }
 
     printf( "Client %i: \"%s\"\n", sock, buffer );
 
+    if( !strcmp( buffer, "/quit" ) )
+      client_quit( clientNum );
+
     // and respond
     write_client( sock, "/ACK" );
+
+    // and tell everyone else
+    dispatch( sock, buffer );
   }
 
-  pthread_exit( NULL );
+  client_quit( clientNum );
   return NULL;
 }
 
