@@ -18,6 +18,7 @@ int main( )
     new_client( sock );
   }
 
+  printf( "Done!\n" );
   pthread_exit( NULL );
   return 0;
 }

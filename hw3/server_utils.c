@@ -77,8 +77,11 @@ inline void dispatch( const int source, const char* msg )
 
 inline void client_quit( const int clientNum )
 {
-  printf( "Client #%i quit\n", clientNum );
-  dispatch( clientNum, sprintf( "Client #%i quit\n", clientNum ) );
+  char buffer[256];
+  sprintf( buffer, "Client #%i quit\n", clientNum );
+  printf( buffer );
+
+  dispatch( clientNum, buffer );
   //FIXME: lock
   running[clientNum] = 0;
   pthread_exit( NULL );

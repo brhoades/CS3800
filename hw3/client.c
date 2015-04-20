@@ -83,7 +83,6 @@ void runCLI( )
   int score_size = 3;
   int received = 0;
   char buff[256], inputbuff[256];
-  bool firstGui = 1;
 
   //don't block
   fcntl(sock, F_SETFL, O_NONBLOCK);
@@ -130,44 +129,34 @@ void runCLI( )
   keypad(mainbox, TRUE);  /* enable keyboard mapping */
 
   strcpy( buff, "" );
+  strcpy( inputbuff, "" );
 
+  attrset(COLOR_PAIR(num % 8));
+
+  draw_borders( mainbox );
+  draw_borders( input );
+
+  // draw to our windows
+  mvwprintw(mainbox, 0, 0, "Chat");
+  mvwprintw(input, 0, 0, "Input");
+
+  wrefresh( mainbox );
+  wrefresh( input );
+  refresh( );
   do
   {
-    // draw to our windows
-    mvwprintw(mainbox, 0, 0, "Chat");
-    mvwprintw(input, 0, 0, "Input");
-    attrset(COLOR_PAIR(num % 8));
-    
-    //clear input
-    wclear( input );
-
-    draw_borders( mainbox );
-    draw_borders( input );
-
     if( c != -1 && c != 0 )
     {
       if( c == '\n' )
       {
-    //FIXME: we should see our own message on completion
-        /*
-        while( 1 ) 
-        { 
-          int res = scanf(" %[^\n]", &buf); 
-          if( res <= 0 )
-            break;
-          else
-          {
-            write(sock, buff, sizeof(buff)); 
-            read(soc, buff, sizeof(buff)); 
-            printf("SERVER: %s\n", buff); 
-          }
-        }
-          */
+        //FIXME: we should see our own message on completion
         buff[num+1] = '\0';
         write( sock, buff, sizeof(buff) );
         // GET ACK
         num = 0;
         buff[0] = '\0';
+
+        //FIXME: we should encapsulate this into a function so we're not duplicating effort
       }
       else if( c == KEY_BACKSPACE )
       {
@@ -189,28 +178,25 @@ void runCLI( )
         num++;
         buff[num] = '\0';
       }
+
+      wclear( input );
+      draw_borders( input );
+      mvwprintw(input, 0, 0, "Input");
       mvwprintw(input, 1, 2, "%s (%i/%i)", buff, num, strlen(buff));
       wrefresh(input);
+      refresh( );
     }
+
     // refresh each window
     read(sock, inputbuff, sizeof(inputbuff)); 
     if( strlen( inputbuff ) > 0 )
     {
-      mvwprintw(mainbox, 1+received, 2, "msg: '%s' (%i)", inputbuff);
+      mvwprintw(mainbox, 1+received, 2, "msg: '%s'", inputbuff);
       received++;
-      inputbuff[0]='\0';
+      strcpy( inputbuff, "" );
+      draw_borders( mainbox );
       wrefresh(mainbox);
-    }
-    else
-    {
-      //mvwprintw(mainbox, 1, 2, "msg: '%s'", inputbuff);
-    }
-
-    if( firstGui )
-    {
-      wrefresh( mainbox );
-      wrefresh( input );
-      firstGui = false;
+      refresh( );
     }
 
     usleep(100); // refresh this often, ms
