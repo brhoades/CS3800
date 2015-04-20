@@ -83,6 +83,7 @@ void runCLI( )
   int score_size = 3;
   int received = 0;
   char buff[256], inputbuff[256];
+  bool firstGui = 1;
 
   //don't block
   fcntl(sock, F_SETFL, O_NONBLOCK);
@@ -96,7 +97,8 @@ void runCLI( )
   //(void) nonl();         /* tell curses not to do NL->CR/NL on output */
   (void) cbreak();       /* take input chars one at a time, no wait for \n */
   (void) echo();         /* echo input - in color */
-  timeout(-1);
+  //timeout(-1);
+  nodelay(stdscr, TRUE); // don't block on getch
 
   if (has_colors())
   {
@@ -142,7 +144,7 @@ void runCLI( )
     draw_borders( mainbox );
     draw_borders( input );
 
-    if( c != -1 )
+    if( c != -1 && c != 0 )
     {
       if( c == '\n' )
       {
@@ -187,9 +189,9 @@ void runCLI( )
         num++;
         buff[num] = '\0';
       }
+      mvwprintw(input, 1, 2, "%s (%i/%i)", buff, num, strlen(buff));
+      wrefresh(input);
     }
-
-    mvwprintw(input, 1, 2, "%s (%i/%i)", buff, num, strlen(buff));
     // refresh each window
     read(sock, inputbuff, sizeof(inputbuff)); 
     if( strlen( inputbuff ) > 0 )
@@ -197,15 +199,23 @@ void runCLI( )
       mvwprintw(mainbox, 1+received, 2, "msg: '%s' (%i)", inputbuff);
       received++;
       inputbuff[0]='\0';
+      wrefresh(mainbox);
     }
     else
     {
       //mvwprintw(mainbox, 1, 2, "msg: '%s'", inputbuff);
     }
-    wrefresh(mainbox);
-    wrefresh(input);
+
+    if( firstGui )
+    {
+      wrefresh( mainbox );
+      wrefresh( input );
+      firstGui = false;
+    }
+
+    usleep(100); // refresh this often, ms
   }
-  while( ( c = wgetch( input ) ) );
+  while( ( c = getch( ) ) );
 
   // clean up
   delwin(mainbox);
