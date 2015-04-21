@@ -172,12 +172,12 @@ void runCLI( )
 
         //FIXME: we should encapsulate this into a function so we're not duplicating effort
       }
-      else if( c == KEY_BACKSPACE )
+      else if( c == KEY_DC || c == KEY_BACKSPACE )
       {
         if( num > 0 )
         {
-          buff[num] = '\0';
           num--;
+          buff[num] = '\0';
         }
       }
       else if( num >= 254 )
