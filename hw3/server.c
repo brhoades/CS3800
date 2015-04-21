@@ -34,8 +34,6 @@ void *handleClient( void * packed )
   int clientNum = ((int*)packed)[0];
   int sock = ((int*)packed)[1];
 
-  printf( "clientNum %i received\n", clientNum );
-
   while( 1 )
   {
     char buffer[256];

@@ -22,7 +22,7 @@ inline void startup_accounting( )
 
 inline void write_client( const int sock, const char* msg )
 {
-  if( write( sock, msg, sizeof(msg) ) <= 0 )
+  if( write( sock, msg, strlen(msg)+1 ) <= 0 )
     perror( "Failed to write to socket" );
 }
 
