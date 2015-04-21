@@ -142,8 +142,11 @@ void runCLI( )
     //mvwprintw( mainbox, 0, 0, "Chat" );
     mvwprintw( input, 0, TITLE_START, "Input" );
 
+    //If the user inputs anything
     if( c != -1 && c != ERR )
     {
+
+      //When user hits enter
       if( c == '\n' )
       {
         // this catches sending newlines to the server.
@@ -152,19 +155,40 @@ void runCLI( )
           c = -1;
           continue;
         }
+        //If entering a command
+        else if (buff[0] == '/' && buff[1] != '/')
+        {
+          if (!strcmp("/quit",buff) || !strcmp("/part",buff) || !strcmp("/exit",buff))
+          {
+            strcpy(socketOut, "");
+            strcat(socketOut, nickname);
+            strcat(socketOut, " has left the chat");
+            write( sock, socketOut, strlen(socketOut)+1 );
+            //cleanup
+            delwin(mainbox);
+            delwin(input);
 
+            finish(0);
+          }
+        }
+
+        //Send the Messsage to the Server
         strcat(socketOut, buff);
         write( sock, socketOut, strlen(socketOut)+1 );
+
         //Format the Window Output
         char winOut[255-7];
         strcpy(winOut, "Me\t\t:  ");
         strcat(winOut, buff);
+
+        //Write Message to this clients window
         get_message( winOut, mainbox, &received );
 
         // GET ACK
         num = 0;
         buff[0] = '\0';
       }
+      //Remove one char from input box
       else if( c == KEY_DC || c == KEY_BACKSPACE )
       {
         if( num > 0 )
@@ -173,12 +197,14 @@ void runCLI( )
           buff[num] = '\0';
         }
       }
+      //When input too large
       else if( num >= (254 - MAX_NICKNAME) )
       {
         buff[254 - MAX_NICKNAME] = c;
         buff[255 - MAX_NICKNAME] = '\0';
         num = 254 - MAX_NICKNAME;
       }
+      //Add the character to input window
       else
       {
         buff[num] = c;
@@ -186,6 +212,7 @@ void runCLI( )
         buff[num] = '\0';
       }
 
+      //Clear input and write the current input string
       wclear( input );
       mvwprintw(input, 1, 2, "%s", buff, num, strlen(buff));
     }
