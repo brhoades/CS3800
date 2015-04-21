@@ -125,7 +125,7 @@ void runCLI( )
   do
   {
     //Format the Message to server
-    char socketOut[255+MAX_NICKNAME];
+    char socketOut[255-MAX_NICKNAME];
     strcpy(socketOut, nickname);
     if (strlen(nickname) < 6)
       strcat(socketOut, "\t\t:  ");
@@ -155,7 +155,12 @@ void runCLI( )
 
         strcat(socketOut, buff);
         write( sock, socketOut, strlen(socketOut)+1 );
-        get_message( buff, mainbox, &received );
+        //Format the Window Output
+        char winOut[255-7];
+        strcpy(winOut, "Me\t\t:  ");
+        strcat(winOut, buff);
+        get_message( winOut, mainbox, &received );
+
         // GET ACK
         num = 0;
         buff[0] = '\0';
@@ -168,11 +173,11 @@ void runCLI( )
           buff[num] = '\0';
         }
       }
-      else if( num >= 254 )
+      else if( num >= (254 - MAX_NICKNAME) )
       {
-        buff[254] = c;
-        buff[255] = '\0';
-        num = 254;
+        buff[254 - MAX_NICKNAME] = c;
+        buff[255 - MAX_NICKNAME] = '\0';
+        num = 254 - MAX_NICKNAME;
       }
       else
       {
