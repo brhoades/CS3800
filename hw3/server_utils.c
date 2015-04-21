@@ -6,8 +6,8 @@
 // UNUSED
 volatile char running[MAX_CLIENTS];
 volatile int sockets[MAX_CLIENTS];
-pthread_mutex_t meta_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_t threads[MAX_CLIENTS];
+pthread_mutex_t meta_lock = PTHREAD_MUTEX_INITIALIZER;
 
 inline void startup_accounting( )
 {

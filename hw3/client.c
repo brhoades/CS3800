@@ -133,25 +133,39 @@ void runCLI( )
 
   attrset(COLOR_PAIR(num % 8));
 
-  draw_borders( mainbox );
+  clear( );
+
   draw_borders( input );
+  draw_borders( mainbox );
 
   // draw to our windows
-  mvwprintw(mainbox, 0, 0, "Chat");
-  mvwprintw(input, 0, 0, "Input");
+  mvwprintw( mainbox, 0, 0, "Chat" );
+  mvwprintw( input, 0, 0, "Input" );
 
-  wrefresh( mainbox );
   wrefresh( input );
-  refresh( );
+
   do
   {
-    if( c != -1 && c != 0 )
+    draw_borders( input );
+    draw_borders( mainbox );
+
+    // draw to our windows
+    mvwprintw( mainbox, 0, 0, "Chat" );
+    mvwprintw( input, 0, 0, "Input" );
+
+      if( c != -1 && c != ERR )
     {
       if( c == '\n' )
       {
+        if( strlen( buff ) == 0 )
+        {
+          c = -1;
+          continue;
+        }
+
         //FIXME: we should see our own message on completion
         buff[num+1] = '\0';
-        write( sock, buff, sizeof(buff) );
+        write( sock, buff, strlen(buff)+1 );
         // GET ACK
         num = 0;
         buff[0] = '\0';
@@ -180,26 +194,22 @@ void runCLI( )
       }
 
       wclear( input );
-      draw_borders( input );
-      mvwprintw(input, 0, 0, "Input");
-      mvwprintw(input, 1, 2, "%s (%i/%i)", buff, num, strlen(buff));
-      wrefresh(input);
-      refresh( );
+      mvwprintw(input, 1, 2, "%s", buff, num, strlen(buff));
     }
 
     // refresh each window
     read(sock, inputbuff, sizeof(inputbuff)); 
     if( strlen( inputbuff ) > 0 )
     {
-      mvwprintw(mainbox, 1+received, 2, "msg: '%s'", inputbuff);
+      mvwprintw(mainbox, 1+received, 2, "%s", inputbuff);
       received++;
       strcpy( inputbuff, "" );
-      draw_borders( mainbox );
-      wrefresh(mainbox);
-      refresh( );
     }
 
-    usleep(100); // refresh this often, ms
+    wrefresh( mainbox );
+    wrefresh( input );
+    refresh( );
+    usleep(250); // refresh this often, ms
   }
   while( ( c = getch( ) ) );
 
