@@ -15,7 +15,7 @@ default: all
 
 all: $(OBJECTS)
 
-client: utils.o client.o
+client: client_utils.o utils.o client.o
 	$(CXX) $(CFLAGS) $? -o client
 
 server: server_utils.o utils.o server.o
@@ -25,6 +25,7 @@ clean:
 	-@rm -f $(OBJECTS)
 
 server_utils.o: server_utils.h server_utils.c
-server.o: server.c
-client.o: client.c
+client_utils.o: client_utils.h client_utils.c
+server.o: server.c server_utils.h server_utils.c utils.h utils.c
+client.o: client.c client_utils.h client_utils.c utils.c utils.h
 utils.o: utils.c utils.h

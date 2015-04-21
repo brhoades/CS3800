@@ -1,39 +1,8 @@
-/************************************************************************/ 
-/*   PROGRAM NAME: client.c  (works with serverX.c)                     */ 
-/*                                                                      */ 
-/*   Client creates a socket to connect to Server.                      */ 
-/*   When the communication established, Client writes data to server   */ 
-/*   and echoes the response from Server.                               */ 
-/*                                                                      */ 
-/*   To run this program, first compile the server_ex.c and run it      */ 
-/*   on a server machine. Then run the client program on another        */ 
-/*   machine.                                                           */ 
-/*                                                                      */ 
-/*   COMPILE:    gcc -o client client.c -lnsl                           */ 
-/*   TO RUN:     client  server-machine-name                            */ 
-/*                                                                      */ 
-/************************************************************************/ 
- 
-#include <stdio.h> 
-#include <sys/types.h> 
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/socket.h>  /* define socket */ 
-#include <netinet/in.h>  /* define internet socket */ 
-#include <netdb.h>       /* define internet socket */ 
-#include <curses.h>
-#include <signal.h>
-#include <fcntl.h>
+#include "client.h"
+#include "client_utils.h"
 
-void draw_borders(WINDOW *screen);
-void runCLI( );
-static void finish(int sig);
-void draw_borders_outside(const int x, const int y);
 int sock=-1;
-#define SERVER_PORT 9999     /* define a server port number */ 
-#define TITLE_START 2
- 
+
 int main( int argc, char* argv[] ) 
 { 
     struct sockaddr_in server_addr = { AF_INET, htons( SERVER_PORT ) }; 
@@ -143,6 +112,7 @@ void runCLI( )
   // draw to our windows
   mvwprintw( input, 0, TITLE_START, "Input" );
 
+  wrefresh( mainbox );
   wrefresh( input );
 
   do
@@ -167,6 +137,7 @@ void runCLI( )
         //FIXME: we should see our own message on completion
         buff[num+1] = '\0';
         write( sock, buff, strlen(buff)+1 );
+        get_message( buff, mainbox, &received );
         // GET ACK
         num = 0;
         buff[0] = '\0';
@@ -201,13 +172,7 @@ void runCLI( )
     read(sock, inputbuff, sizeof(inputbuff)); 
     if( strlen( inputbuff ) > 0 )
     {
-      int y, x;
-      getmaxyx( mainbox, y, x );
-      if( received < y-2 )
-        received++;
-      else
-        wscrl( mainbox, 1 );
-      mvwprintw(mainbox, 1+received, 2, "%s", inputbuff);
+      get_message( inputbuff, mainbox, &received );
       strcpy( inputbuff, "" );
     }
 
