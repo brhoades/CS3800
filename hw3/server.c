@@ -17,8 +17,11 @@ int main( )
 
   while( 1 )
   {
+    struct sockaddr_in client_addr;
+    int clilen = sizeof( client_addr );
+
     listen( sock, 5 );
-    new_client( sock );
+    new_client( accept( sock, (struct sockaddr*)&client_addr, &clilen ) ); // accept blocks
   }
 
   printf( "Done!\n" );
@@ -31,6 +34,8 @@ void *handleClient( void * packed )
   int clientNum = ((int*)packed)[0];
   int sock = ((int*)packed)[1];
 
+  printf( "clientNum %i received\n", clientNum );
+
   while( 1 )
   {
     char buffer[256];
@@ -40,13 +45,11 @@ void *handleClient( void * packed )
     {
       if( res != 0 )
         perror( "Failed to read from socket" );
-      else
-        perror( "Client closed the connection" );
       client_quit( clientNum );
       return NULL;
     }
 
-    printf( "Client %i: \"%s\"\n", clientNum + 1, buffer );
+    printf( "Client %i: \"%s\"\n", clientNum, buffer );
 
     if( !strcmp( buffer, "/quit" ) )
       client_quit( clientNum );

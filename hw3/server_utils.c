@@ -28,8 +28,7 @@ inline void write_client( const int sock, const char* msg )
 
 inline void new_client( const int sock )
 {
-  struct sockaddr_in client_addr;
-  int clilen = sizeof( client_addr ), i;
+  int i;
   int packed[2];
 
   pthread_mutex_lock( &meta_lock );
@@ -47,8 +46,8 @@ inline void new_client( const int sock )
     exit( 3 );
   }
 
-  packed[0] = (long)i;
-  packed[1] = accept( sock, (struct sockaddr*)&client_addr, &clilen );
+  packed[0] = i;
+  packed[1] = sock;
 
   pthread_mutex_lock( &meta_lock );
   sockets[i] = packed[1];
@@ -59,11 +58,11 @@ inline void new_client( const int sock )
     exit( 2 );
   }
   else
-    printf( "New client #%i (sock: %i) connected\n", i + 1, sockets[i] ); 
-
-  write_client( sockets[i], "Welcome\n" );
+    printf( "New client #%i (sock: %i) connected\n", i, sockets[i] ); 
 
   running[i] = 1;
+  write_client( sockets[i], "Connected" );
+
   pthread_mutex_unlock( &meta_lock );
 } 
 
@@ -76,7 +75,7 @@ inline void dispatch( const int source, const char* msg )
   {
     if( running[i] && i != source )
     {
-      printf( "Writing \"%s\" to %i's socket (%i)\n", msg, i+1, sockets[i] );
+      printf( "Writing \"%s\" to %i's socket (%i)\n", msg, i, sockets[i] );
       write_client( sockets[i], msg );
     }
   }
@@ -86,8 +85,8 @@ inline void dispatch( const int source, const char* msg )
 inline void client_quit( const int clientNum )
 {
   char buffer[256];
-  sprintf( buffer, "Client #%i quit\n", clientNum + 1 );
-  printf( buffer );
+  sprintf( buffer, "Client #%i quit", clientNum );
+  printf( "Client #%i quit\n", clientNum );
 
   dispatch( clientNum, buffer );
 
