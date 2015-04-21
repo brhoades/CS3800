@@ -29,8 +29,10 @@
 void draw_borders(WINDOW *screen);
 void runCLI( );
 static void finish(int sig);
+void draw_borders_outside(const int x, const int y);
 int sock=-1;
 #define SERVER_PORT 9999     /* define a server port number */ 
+#define TITLE_START 2
  
 int main( int argc, char* argv[] ) 
 { 
@@ -96,7 +98,6 @@ void runCLI( )
   //(void) nonl();         /* tell curses not to do NL->CR/NL on output */
   (void) cbreak();       /* take input chars one at a time, no wait for \n */
   (void) echo();         /* echo input - in color */
-  //timeout(-1);
   nodelay(stdscr, TRUE); // don't block on getch
 
   if (has_colors())
@@ -123,8 +124,11 @@ void runCLI( )
   // get our maximum window dimensions
   getmaxyx(stdscr, parent_y, parent_x);
   // set up initial windows
-  WINDOW *mainbox = newwin(parent_y - score_size, parent_x, 0, 0);
+  WINDOW *mainbox = newwin(parent_y - score_size-2, parent_x-1, 1, 1); // we are off by one to allow borders outside of our window
+  draw_borders_outside(parent_y - score_size, parent_x);
+  mvprintw( 0, TITLE_START, "Chat" );
   WINDOW *input = newwin(score_size, parent_x, parent_y - score_size, 0);
+  scrollok(mainbox, 1);
   keypad(input, TRUE);  /* enable keyboard mapping */
   keypad(mainbox, TRUE);  /* enable keyboard mapping */
 
@@ -133,25 +137,22 @@ void runCLI( )
 
   attrset(COLOR_PAIR(num % 8));
 
-  clear( );
-
   draw_borders( input );
-  draw_borders( mainbox );
+  //draw_borders( mainbox );
 
   // draw to our windows
-  mvwprintw( mainbox, 0, 0, "Chat" );
-  mvwprintw( input, 0, 0, "Input" );
+  mvwprintw( input, 0, TITLE_START, "Input" );
 
   wrefresh( input );
 
   do
   {
     draw_borders( input );
-    draw_borders( mainbox );
+    //draw_borders( mainbox );
 
     // draw to our windows
-    mvwprintw( mainbox, 0, 0, "Chat" );
-    mvwprintw( input, 0, 0, "Input" );
+    //mvwprintw( mainbox, 0, 0, "Chat" );
+    mvwprintw( input, 0, TITLE_START, "Input" );
 
       if( c != -1 && c != ERR )
     {
@@ -197,12 +198,16 @@ void runCLI( )
       mvwprintw(input, 1, 2, "%s", buff, num, strlen(buff));
     }
 
-    // refresh each window
     read(sock, inputbuff, sizeof(inputbuff)); 
     if( strlen( inputbuff ) > 0 )
     {
+      int y, x;
+      getmaxyx( mainbox, y, x );
+      if( received < y-2 )
+        received++;
+      else
+        wscrl( mainbox, 1 );
       mvwprintw(mainbox, 1+received, 2, "%s", inputbuff);
-      received++;
       strcpy( inputbuff, "" );
     }
 
@@ -247,5 +252,24 @@ void draw_borders(WINDOW *screen) {
   for (i = 1; i < (x - 1); i++) {
     mvwprintw(screen, 0, i, "-");
     mvwprintw(screen, y - 1, i, "-");
+  }
+}
+
+void draw_borders_outside(const int y, const int x) {
+  int i;
+  // 4 corners
+  mvprintw( 0, 0, "+");
+  mvprintw( y - 1, 0, "+");
+  mvprintw( 0, x - 1, "+");
+  mvprintw( y - 1, x - 1, "+");
+  // sides
+  for (i = 1; i < (y - 1); i++) {
+    mvprintw( i, 0, "|");
+    mvprintw( i, x - 1, "|");
+  }
+  // top and bottom
+  for (i = 1; i < (x - 1); i++) {
+    mvprintw(0, i, "-");
+    mvprintw(y - 1, i, "-");
   }
 }
