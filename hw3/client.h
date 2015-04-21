@@ -17,4 +17,5 @@ void draw_borders_outside(const int x, const int y);
 
 #define SERVER_PORT 9999     /* define a server port number */ 
 #define TITLE_START 2
+#define MAX_NICKNAME 14
  

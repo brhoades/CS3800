@@ -2,6 +2,7 @@
 #include "client_utils.h"
 
 int sock=-1;
+char nickname[MAX_NICKNAME];
 
 int main( int argc, char* argv[] ) 
 { 
@@ -39,7 +40,14 @@ int main( int argc, char* argv[] )
     } 
  
     printf("connect() successful! will send a message to server\n"); 
-    printf("Input a string:\n" ); 
+    printf("Please Input a Nickname:   " );
+    gets(nickname);
+    while (strlen(nickname) > 14)
+    {
+      printf("\nNickname Max is %i chars\n", MAX_NICKNAME);
+      printf("Please Input a Nickname:   " );
+      gets(nickname);
+    }
 
     runCLI( );
 
@@ -116,6 +124,17 @@ void runCLI( )
 
   do
   {
+    //Format the Message to server
+    char socketOut[255+MAX_NICKNAME];
+    strcpy(socketOut, nickname);
+    if (strlen(nickname) < 6)
+      strcat(socketOut, "\t\t:  ");
+    else if (strlen(nickname) >= 6 && strlen(nickname) < 14)
+      strcat(socketOut, "\t:  ");
+    else
+      strcat(socketOut, ":  ");
+
+
     draw_borders( input );
     //draw_borders( mainbox );
 
@@ -123,7 +142,7 @@ void runCLI( )
     //mvwprintw( mainbox, 0, 0, "Chat" );
     mvwprintw( input, 0, TITLE_START, "Input" );
 
-      if( c != -1 && c != ERR )
+    if( c != -1 && c != ERR )
     {
       if( c == '\n' )
       {
@@ -134,8 +153,8 @@ void runCLI( )
           continue;
         }
 
-        buff[num+1] = '\0';
-        write( sock, buff, strlen(buff)+1 );
+        strcat(socketOut, buff);
+        write( sock, socketOut, strlen(socketOut)+1 );
         get_message( buff, mainbox, &received );
         // GET ACK
         num = 0;
