@@ -5,6 +5,9 @@ int main( )
 {
   int sock;
 
+  // Ignore SIGPIPE for now.... causing termination
+  signal( SIGPIPE, SIG_IGN );
+
   startup_accounting( );
 
   sock = setupSocket( );

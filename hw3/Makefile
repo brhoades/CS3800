@@ -3,6 +3,7 @@ CFLAGS=-lcurses -lform -lnsl -g -Wall
 
 OBJECTS=client \
 				server_utils.o \
+        utils.o \
 				server 
 
 .SUFFIXES: .c
@@ -14,10 +15,10 @@ default: all
 
 all: $(OBJECTS)
 
-client: client.o
+client: utils.o client.o
 	$(CXX) $(CFLAGS) $? -o client
 
-server: server.o server_utils.o
+server: server_utils.o utils.o server.o
 	$(CXX) $(CFLAGS) $? -pthread -o server
 
 clean: 
@@ -26,4 +27,4 @@ clean:
 server_utils.o: server_utils.h server_utils.c
 server.o: server.c
 client.o: client.c
-
+utils.o: utils.c utils.h

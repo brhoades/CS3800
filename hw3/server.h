@@ -7,6 +7,7 @@
 #include <sys/socket.h>  /* define socket */
 #include <netinet/in.h>  /* define internet socket */
 #include <netdb.h>       /* define internet socket */
+#include <signal.h>
 
 #include "server_utils.h"
 

@@ -1,5 +1,6 @@
 #include "server.h"
 #include "server_utils.h"
+#include "utils.h"
 
 // locks for thread positions
 // UNUSED
@@ -11,18 +12,18 @@ pthread_t threads[MAX_CLIENTS];
 inline void startup_accounting( )
 {
   int i;
+
   // Show all clients as available
+  pthread_mutex_lock( &meta_lock );
   for( i=0; i<MAX_CLIENTS; i++ )
     running[i] = 0;
+  pthread_mutex_unlock( &meta_lock );
 }
 
 inline void write_client( const int sock, const char* msg )
 {
   if( write( sock, msg, sizeof(msg) ) <= 0 )
-  {
     perror( "Failed to write to socket" );
-    pthread_exit( NULL );
-  }
 }
 
 inline void new_client( const int sock )
@@ -31,11 +32,13 @@ inline void new_client( const int sock )
   int clilen = sizeof( client_addr ), i;
   int packed[2];
 
+  pthread_mutex_lock( &meta_lock );
   for( i=0; i<MAX_CLIENTS; i++ )
   {
     if( !running[i] )
       break;
   }
+  pthread_mutex_unlock( &meta_lock );
 
   if( i == MAX_CLIENTS )
   {
@@ -46,11 +49,13 @@ inline void new_client( const int sock )
 
   packed[0] = (long)i;
   packed[1] = accept( sock, (struct sockaddr*)&client_addr, &clilen );
-  //FIXME: lock
+
+  pthread_mutex_lock( &meta_lock );
   sockets[i] = packed[1];
   if( pthread_create( &threads[i], NULL, handleClient, (void *)packed ) ) 
   {
     printf( "Thread creation failure.\n" );
+    pthread_mutex_unlock( &meta_lock );
     exit( 2 );
   }
   else
@@ -59,12 +64,14 @@ inline void new_client( const int sock )
   write_client( sockets[i], "Welcome\n" );
 
   running[i] = 1;
+  pthread_mutex_unlock( &meta_lock );
 } 
 
 inline void dispatch( const int source, const char* msg )
 {
   int i;
 
+  pthread_mutex_lock( &meta_lock );
   for( i=0; i<MAX_CLIENTS; i++ )
   {
     if( running[i] && i != source )
@@ -73,16 +80,20 @@ inline void dispatch( const int source, const char* msg )
       write_client( sockets[i], msg );
     }
   }
+  pthread_mutex_unlock( &meta_lock );
 }
 
 inline void client_quit( const int clientNum )
 {
   char buffer[256];
-  sprintf( buffer, "Client #%i quit\n", clientNum );
+  sprintf( buffer, "Client #%i quit\n", clientNum + 1 );
   printf( buffer );
 
   dispatch( clientNum, buffer );
-  //FIXME: lock
+
+  pthread_mutex_lock( &meta_lock );
   running[clientNum] = 0;
+  pthread_mutex_unlock( &meta_lock );
+
   pthread_exit( NULL );
 }
