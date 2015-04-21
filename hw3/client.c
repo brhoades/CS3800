@@ -107,7 +107,6 @@ void runCLI( )
   attrset(COLOR_PAIR(num % 8));
 
   draw_borders( input );
-  //draw_borders( mainbox );
 
   // draw to our windows
   mvwprintw( input, 0, TITLE_START, "Input" );
@@ -128,21 +127,19 @@ void runCLI( )
     {
       if( c == '\n' )
       {
+        // this catches sending newlines to the server.
         if( strlen( buff ) == 0 )
         {
           c = -1;
           continue;
         }
 
-        //FIXME: we should see our own message on completion
         buff[num+1] = '\0';
         write( sock, buff, strlen(buff)+1 );
         get_message( buff, mainbox, &received );
         // GET ACK
         num = 0;
         buff[0] = '\0';
-
-        //FIXME: we should encapsulate this into a function so we're not duplicating effort
       }
       else if( c == KEY_DC || c == KEY_BACKSPACE )
       {
