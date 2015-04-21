@@ -16,10 +16,10 @@ default: all
 all: $(OBJECTS)
 
 client: client_utils.o utils.o client.o
-	$(CXX) $(CFLAGS) $? -o client
+	$(CXX) $(CFLAGS) $^ -o client
 
 server: server_utils.o utils.o server.o
-	$(CXX) $(CFLAGS) $? -pthread -o server
+	$(CXX) $(CFLAGS) $^ -pthread -o server
 
 clean: 
 	-@rm -f $(OBJECTS)
