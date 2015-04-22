@@ -49,6 +49,7 @@ int main( int argc, char* argv[] )
       gets(nickname);
     }
 
+
     runCLI( );
 
     close(sock); 
@@ -122,6 +123,13 @@ void runCLI( )
   wrefresh( mainbox );
   wrefresh( input );
 
+  //Initial Connected Message
+  char conMsg[255];
+  strcpy( conMsg, nickname );
+  strcat(conMsg, " has connected to the chat.");
+  write( sock, conMsg, strlen(conMsg)+1 );
+  get_message( conMsg, mainbox, &received );
+
   do
   {
     //Format the Message to server
@@ -142,7 +150,7 @@ void runCLI( )
     //mvwprintw( mainbox, 0, 0, "Chat" );
     mvwprintw( input, 0, TITLE_START, "Input" );
 
-    //If the user inputs anything
+    //If the user inputs anything 
     if( c != -1 && c != ERR )
     {
 
@@ -164,6 +172,7 @@ void runCLI( )
             strcat(socketOut, nickname);
             strcat(socketOut, " has left the chat");
             write( sock, socketOut, strlen(socketOut)+1 );
+
             //cleanup
             delwin(mainbox);
             delwin(input);
@@ -231,11 +240,13 @@ void runCLI( )
   }
   while( ( c = getch( ) ) );
 
+  /*
   // clean up
   delwin(mainbox);
   delwin(input);
 
   finish(0);
+  */
 } 
 
 static void finish(int sig)

@@ -61,7 +61,6 @@ inline void new_client( const int sock )
     printf( "New client #%i (sock: %i) connected\n", i, sockets[i] ); 
 
   running[i] = 1;
-  write_client( sockets[i], "Connected" );
 
   pthread_mutex_unlock( &meta_lock );
 } 
@@ -84,11 +83,7 @@ inline void dispatch( const int source, const char* msg )
 
 inline void client_quit( const int clientNum )
 {
-  char buffer[256];
-  sprintf( buffer, "Client #%i quit", clientNum );
   printf( "Client #%i quit\n", clientNum );
-
-  dispatch( clientNum, buffer );
 
   pthread_mutex_lock( &meta_lock );
   running[clientNum] = 0;
