@@ -94,39 +94,26 @@ inline void client_quit( const int clientNum )
   pthread_mutex_lock( &meta_lock );
   running[clientNum] = 0;
   pthread_mutex_unlock( &meta_lock );
-
-  pthread_exit( NULL );
 }
 
-inline void signalhandler(const int sig)
+void signalhandler( const int sig )
 {
-  printf("SHUTDOWN: The server will shutdown in 10 seconds!!");
-  char msg[255];
-  strcpy(msg, "SHUTDOWN: The server will shutdown in 10 seconds!!");
+  printf( "\nExiting in 10 seconds\n" )  ;
+  dispatch( -1, "SHUTDOWN: The server will shutdown in 10 seconds!" );
 
   pthread_mutex_lock( &meta_lock );
+  sleep( 10 );
   for( int i=0; i<MAX_CLIENTS; i++ )
   {
     if( running[i] )
     {
-      printf( "Writing \"%s\" to %i's socket (%i)\n", msg, i, sockets[i] );
-      write_client( sockets[i], msg );
+      pthread_mutex_unlock( &meta_lock );
+      client_quit( i );
+      pthread_mutex_lock( &meta_lock );
+      pthread_kill( threads[i], SIGINT );
     }
   }
   pthread_mutex_unlock( &meta_lock );
-  sleep(10);
-  for (int i = 0; i < MAX_CLIENTS; i++)
-  {
-    if(running[i])
-    {
-      printf( "Client #%i quit\n", i );
-      pthread_mutex_lock( &meta_lock );
-      running[i] = 0;
-      pthread_mutex_unlock( &meta_lock );
-    }
-  }
 
-  //This line causes the server to wait for all clients to DC before closing
-  //pthread_exit( NULL );
   exit(0);
 }

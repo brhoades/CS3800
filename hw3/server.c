@@ -5,6 +5,7 @@
  * Billy Rhoades
 */
 #include "server.h"
+#include "client.h" // this pulls our constants like max message length
 
 // This thread becomes a listner
 int main( )
@@ -42,7 +43,7 @@ void *handleClient( void * packed )
 
   while( 1 )
   {
-    char buffer[256];
+    char buffer[MAX_MESSAGE];
     int res = read( sock, buffer, sizeof(buffer) ); 
 
     if( res <= 0 )
@@ -55,17 +56,12 @@ void *handleClient( void * packed )
 
     printf( "Client %i: \"%s\"\n", clientNum, buffer );
 
-    if( !strcmp( buffer, "/quit" ) )
-      client_quit( clientNum );
-
-    // and respond
-    //write_client( sock, "/ACK" );
-
     // and tell everyone else
     dispatch( clientNum, buffer );
   }
 
   client_quit( clientNum );
+  pthread_exit( NULL );
   return NULL;
 }
 
