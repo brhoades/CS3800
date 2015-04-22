@@ -2,7 +2,8 @@
 #include "client_utils.h"
 
 int sock=-1;
-int Error = 0;
+//For some reason, uncommented this line, wont compile
+//int Error = 0;
 char nickname[MAX_NICKNAME];
 char exitMsg[32];
 
