@@ -1,3 +1,9 @@
+/*
+ * Assignment 3 - Chatroom
+ *
+ * Devin Kiser
+ * Billy Rhoades
+*/
 /***************************
   General tools for client and server
  **************************/

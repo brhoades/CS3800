@@ -1,3 +1,9 @@
+/*
+ * Assignment 3 - Chatroom
+ *
+ * Devin Kiser
+ * Billy Rhoades
+*/
 #include "server.h"
 #include "server_utils.h"
 #include "utils.h"

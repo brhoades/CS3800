@@ -1,3 +1,9 @@
+/*
+ * Assignment 3 - Chatroom
+ *
+ * Devin Kiser
+ * Billy Rhoades
+*/
 #include "server.h"
 
 // This thread becomes a listner

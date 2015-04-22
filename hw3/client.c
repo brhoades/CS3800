@@ -1,3 +1,9 @@
+/*
+ * Assignment 3 - Chatroom
+ *
+ * Devin Kiser
+ * Billy Rhoades
+*/
 #include "client.h"
 #include "client_utils.h"
 

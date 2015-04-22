@@ -1,3 +1,9 @@
+/*
+ * Assignment 3 - Chatroom
+ *
+ * Devin Kiser
+ * Billy Rhoades
+*/
 void startup_accounting( );
 void dispatch( const int source, const char* msg );
 void new_client( const int sock );

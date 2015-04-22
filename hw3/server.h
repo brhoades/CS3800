@@ -1,3 +1,9 @@
+/*
+ * Assignment 3 - Chatroom
+ *
+ * Devin Kiser
+ * Billy Rhoades
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
