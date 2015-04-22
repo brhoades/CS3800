@@ -13,8 +13,7 @@ int sock=-1;
 char nickname[MAX_NICKNAME];
 char exitMsg[32];
 WINDOW *mainbox = NULL;
-int received_count=0; // count of messages on the screen
-char inputbuff[256];
+char inputbuff[MAX_MESSAGE]; // Used to push in messages globally
 
 int main( int argc, char* argv[] ) 
 { 
@@ -72,22 +71,21 @@ int main( int argc, char* argv[] )
 
 void runCLI( )
 {
-  char buff[256];  // buffer for inputting text
+  char buff[MAX_MESSAGE];  // buffer for inputting text
   int num = 0, c = -1;
   int parent_x, parent_y;
   int score_size = 3;
-  int received = 0;
+  int received_count=0; // count of messages on the screen
 
   //don't block
   fcntl(sock, F_SETFL, O_NONBLOCK);
 
   /* initialize your non-curses data structures here */
 
-  (void) signal(SIGINT, finish);      /* arrange interrupts to terminate */
+  (void) signal(SIGINT, finish);      /* arrange interrupts to go to finish and do nothing */
 
   (void) initscr();      /* initialize the curses library */
   keypad(stdscr, TRUE);  /* enable keyboard mapping */
-  //(void) nonl();         /* tell curses not to do NL->CR/NL on output */
   (void) cbreak();       /* take input chars one at a time, no wait for \n */
   (void) echo();         /* echo input - in color */
   nodelay(stdscr, TRUE); // don't block on getch
@@ -95,13 +93,6 @@ void runCLI( )
   if (has_colors())
   {
     start_color();
-
-    /*
-     * Simple color assignment, often all we need.  Color pair 0 cannot
-     * be redefined.  This example uses the same value for the color
-     * pair as for the foreground color, though of course that is not
-     * necessary:
-     */
     init_pair(1, COLOR_RED,     COLOR_BLACK);
     init_pair(2, COLOR_GREEN,   COLOR_BLACK);
     init_pair(3, COLOR_YELLOW,  COLOR_BLACK);
@@ -117,6 +108,7 @@ void runCLI( )
   getmaxyx(stdscr, parent_y, parent_x);
   // set up initial windows
   WINDOW *mainbox = newwin(parent_y - score_size-2, parent_x-1, 1, 1); // we are off by one to allow borders outside of our window
+  // this allows us to overflow and scroll while keeping the border
   draw_borders_outside(parent_y - score_size, parent_x);
   mvprintw( 0, TITLE_START, "Chat" );
   WINDOW *input = newwin(score_size, parent_x, parent_y - score_size, 0);
@@ -138,7 +130,7 @@ void runCLI( )
   wrefresh( input );
 
   //Initial Connected Message
-  char conMsg[255];
+  char conMsg[MAX_MESSAGE];
   strcpy( conMsg, nickname );
   strcat(conMsg, " has connected to the chat.");
   write( sock, conMsg, strlen(conMsg)+1 );
@@ -148,7 +140,7 @@ void runCLI( )
   do
   {
     //Format the Message to server
-    char socketOut[255-MAX_NICKNAME];
+    char socketOut[MAX_MESSAGE-MAX_NICKNAME];
     strcpy(socketOut, nickname);
     if (strlen(nickname) < 6)
       strcat(socketOut, "\t\t:  ");
@@ -203,7 +195,7 @@ void runCLI( )
         write( sock, socketOut, strlen(socketOut)+1 );
 
         //Format the Window Output
-        char winOut[255-7];
+        char winOut[MAX_MESSAGE-7];
         strcpy(winOut, "Me\t\t:  ");
         strcat(winOut, buff);
 
@@ -224,11 +216,11 @@ void runCLI( )
         }
       }
       //When input too large
-      else if( num >= (254 - MAX_NICKNAME) )
+      else if( num >= (MAX_MESSAGE - MAX_NICKNAME) )
       {
-        buff[254 - MAX_NICKNAME] = c;
-        buff[255 - MAX_NICKNAME] = '\0';
-        num = 254 - MAX_NICKNAME;
+        buff[MAX_MESSAGE - MAX_NICKNAME] = c;
+        buff[MAX_MESSAGE - MAX_NICKNAME] = '\0';
+        num = MAX_MESSAGE - MAX_NICKNAME;
       }
       //Add the character to input window
       else
@@ -249,29 +241,16 @@ void runCLI( )
       get_message( inputbuff, mainbox, &received_count );
       strcpy( inputbuff, "" );
     }
-    /*
-    if (exitError)
-    {
-      strcpy(exitMsg, "Please Use /part /quit /exit");
-      get_message( exitMsg, mainbox, &received );
-      exitError = 0;
-    }
-    */
 
     wrefresh( mainbox );
     wrefresh( input );
     refresh( );
-    usleep(250); // refresh this often, ms/
+    usleep( THINK_RATE ); // refresh this often, ms/
   }
   while( ( c = getch( ) ) );
 
-  /*
-  // clean up
-  delwin(mainbox);
-  delwin(input);
+  // if we somehow get out here
 
-  finish(0);
-  */
 } 
 
 void finish(int sig)
