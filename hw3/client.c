@@ -2,10 +2,15 @@
 #include "client_utils.h"
 
 int sock=-1;
+int Error = 0;
 char nickname[MAX_NICKNAME];
+char exitMsg[32];
 
 int main( int argc, char* argv[] ) 
 { 
+    //At this point we can handle the CTRL+C
+    signal( SIGINT, signalhandler );
+
     struct sockaddr_in server_addr = { AF_INET, htons( SERVER_PORT ) }; 
     char buf[256]; 
     struct hostent *hp; 
@@ -130,6 +135,7 @@ void runCLI( )
   write( sock, conMsg, strlen(conMsg)+1 );
   get_message( conMsg, mainbox, &received );
 
+
   do
   {
     //Format the Message to server
@@ -232,11 +238,19 @@ void runCLI( )
       get_message( inputbuff, mainbox, &received );
       strcpy( inputbuff, "" );
     }
+    /*
+    if (exitError)
+    {
+      strcpy(exitMsg, "Please Use /part /quit /exit");
+      get_message( exitMsg, mainbox, &received );
+      exitError = 0;
+    }
+    */
 
     wrefresh( mainbox );
     wrefresh( input );
     refresh( );
-    usleep(250); // refresh this often, ms
+    usleep(250); // refresh this often, ms/
   }
   while( ( c = getch( ) ) );
 

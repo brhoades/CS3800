@@ -120,5 +120,7 @@ inline void signalhandler(const int sig)
     }
   }
 
+  //This line causes the server to wait for all clients to DC before closing
+  //pthread_exit( NULL );
   exit(0);
 }
