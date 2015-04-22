@@ -3,6 +3,8 @@
  *
  * Devin Kiser
  * Billy Rhoades
+
+ Compilation: run the command "make"
 */
 #include "server.h"
 #include "client.h" // this pulls our constants like max message length

@@ -3,6 +3,8 @@
  *
  * Devin Kiser
  * Billy Rhoades
+
+ Compilation: run the command "make"
 */
 #include "client.h"
 #include "client_utils.h"

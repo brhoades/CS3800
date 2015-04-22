@@ -3,6 +3,8 @@
  *
  * Devin Kiser
  * Billy Rhoades
+
+ Compilation: run the command "make"
 */
 #include <stdio.h>
 #include <stdlib.h>
