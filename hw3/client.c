@@ -6,11 +6,13 @@ int sock=-1;
 //int Error = 0;
 char nickname[MAX_NICKNAME];
 char exitMsg[32];
+WINDOW *mainbox = NULL;
+int received_count=0; // count of messages on the screen
 
 int main( int argc, char* argv[] ) 
 { 
     //At this point we can handle the CTRL+C
-    signal( SIGINT, signalhandler );
+    //signal( SIGINT, signalhandler );
 
     struct sockaddr_in server_addr = { AF_INET, htons( SERVER_PORT ) }; 
     char buf[256]; 
@@ -134,7 +136,7 @@ void runCLI( )
   strcpy( conMsg, nickname );
   strcat(conMsg, " has connected to the chat.");
   write( sock, conMsg, strlen(conMsg)+1 );
-  get_message( conMsg, mainbox, &received );
+  get_message( conMsg, mainbox, &received_count );
 
 
   do
@@ -184,7 +186,9 @@ void runCLI( )
             delwin(mainbox);
             delwin(input);
 
-            finish(0);
+            endwin();
+
+            exit( 0 );
           }
         }
 
@@ -198,7 +202,7 @@ void runCLI( )
         strcat(winOut, buff);
 
         //Write Message to this clients window
-        get_message( winOut, mainbox, &received );
+        get_message( winOut, mainbox, &received_count );
 
         // GET ACK
         num = 0;
@@ -236,7 +240,7 @@ void runCLI( )
     read(sock, inputbuff, sizeof(inputbuff)); 
     if( strlen( inputbuff ) > 0 )
     {
-      get_message( inputbuff, mainbox, &received );
+      get_message( inputbuff, mainbox, &received_count );
       strcpy( inputbuff, "" );
     }
     /*
@@ -264,14 +268,15 @@ void runCLI( )
   */
 } 
 
-static void finish(int sig)
+void finish(int sig)
 {
-  endwin();
-  pthread_exit( NULL );
+  get_message( "Don't do this!", mainbox, &received_count );
+
+  //pthread_exit( NULL );
 
   /* do your non-curses wrapup here */
 
-  exit(0);
+  //exit(0);
 }
 
 void draw_borders(WINDOW *screen) {
