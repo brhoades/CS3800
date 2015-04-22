@@ -52,15 +52,14 @@ int main( int argc, char* argv[] )
       exit( 1 ); 
     } 
  
-    printf("connect() successful! will send a message to server\n"); 
-    printf("Please Input a Nickname:   " );
-    gets(nickname);
-    while (strlen(nickname) > 14)
+    do
     {
-      printf("\nNickname Max is %i chars\n", MAX_NICKNAME);
-      printf("Please Input a Nickname:   " );
-      gets(nickname);
+      if( strlen( nickname ) != 0 )
+        printf( "\nNickname Max is %i chars\n", MAX_NICKNAME );
+      printf( "Please Input a Nickname: " );
+      scanf( "%s", &nickname );
     }
+    while( strlen( nickname ) > MAX_NICKNAME || strlen( nickname ) == 0);
 
 
     runCLI( );
@@ -82,13 +81,13 @@ void runCLI( )
 
   /* initialize your non-curses data structures here */
 
-  (void) signal(SIGINT, finish);      /* arrange interrupts to go to finish and do nothing */
-  (void) signal(SIGINT, endclisig);      /* arrange connection failures to end cleanly */
+  signal(SIGINT, finish);      /* arrange interrupts to go to finish and do nothing */
+  signal(SIGINT, endclisig);      /* arrange connection failures to end cleanly */
 
-  (void) initscr();      /* initialize the curses library */
+  initscr();      /* initialize the curses library */
   keypad(stdscr, TRUE);  /* enable keyboard mapping */
-  (void) cbreak();       /* take input chars one at a time, no wait for \n */
-  (void) echo();         /* echo input - in color */
+  cbreak();       /* take input chars one at a time, no wait for \n */
+  echo();         /* echo input - in color */
   nodelay(stdscr, TRUE); // don't block on getch
 
   if (has_colors())

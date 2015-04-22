@@ -111,10 +111,11 @@ void signalhandler( const int sig )
       client_quit( i );
       pthread_mutex_lock( &meta_lock );
       write_client( sockets[i], "/disconnected" );
-      pthread_kill( threads[i], SIGINT );
+      pthread_cancel( threads[i] );
     }
   }
   pthread_mutex_unlock( &meta_lock );
 
+  closeSocket( );
   exit(0);
 }

@@ -22,4 +22,4 @@
 
 void *handleClient( void * );
 int setupSocket( );
-
+void closeSocket( );

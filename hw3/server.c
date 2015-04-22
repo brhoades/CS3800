@@ -7,11 +7,11 @@
 #include "server.h"
 #include "client.h" // this pulls our constants like max message length
 
+int sock;
+
 // This thread becomes a listner
 int main( )
 {
-  int sock;
-
   // Ignore SIGPIPE for now.... causing termination
   signal( SIGINT, signalhandler );
 
@@ -32,6 +32,8 @@ int main( )
   }
 
   printf( "Done!\n" );
+
+  closeSocket( );
   pthread_exit( NULL );
   return 0;
 }
@@ -90,4 +92,9 @@ int setupSocket( )
   }
 
   return sock;
+}
+
+inline void closeSocket( )
+{
+  close( sock );
 }
