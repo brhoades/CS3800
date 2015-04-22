@@ -8,6 +8,7 @@ char nickname[MAX_NICKNAME];
 char exitMsg[32];
 WINDOW *mainbox = NULL;
 int received_count=0; // count of messages on the screen
+char inputbuff[256];
 
 int main( int argc, char* argv[] ) 
 { 
@@ -15,7 +16,6 @@ int main( int argc, char* argv[] )
     //signal( SIGINT, signalhandler );
 
     struct sockaddr_in server_addr = { AF_INET, htons( SERVER_PORT ) }; 
-    char buf[256]; 
     struct hostent *hp; 
  
     if( argc != 2 ) 
@@ -66,11 +66,11 @@ int main( int argc, char* argv[] )
 
 void runCLI( )
 {
+  char buff[256];  // buffer for inputting text
   int num = 0, c = -1;
   int parent_x, parent_y;
   int score_size = 3;
   int received = 0;
-  char buff[256], inputbuff[256];
 
   //don't block
   fcntl(sock, F_SETFL, O_NONBLOCK);
@@ -270,7 +270,8 @@ void runCLI( )
 
 void finish(int sig)
 {
-  get_message( "Don't do this!", mainbox, &received_count );
+  // for the love of god this may break at any moment
+  strcpy(inputbuff, "Please use /quit, /part, /exit to cleanly exit.");
 
   //pthread_exit( NULL );
 
