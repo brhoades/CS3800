@@ -83,6 +83,7 @@ void runCLI( )
   /* initialize your non-curses data structures here */
 
   (void) signal(SIGINT, finish);      /* arrange interrupts to go to finish and do nothing */
+  (void) signal(SIGINT, endclisig);      /* arrange connection failures to end cleanly */
 
   (void) initscr();      /* initialize the curses library */
   keypad(stdscr, TRUE);  /* enable keyboard mapping */
@@ -180,13 +181,7 @@ void runCLI( )
             strcat(socketOut, " has left the chat");
             write( sock, socketOut, strlen(socketOut)+1 );
 
-            //cleanup
-            delwin(mainbox);
-            delwin(input);
-
-            endwin();
-
-            exit( 0 );
+            break;
           }
         }
 
@@ -239,7 +234,14 @@ void runCLI( )
     if( strlen( inputbuff ) > 0 )
     {
       get_message( inputbuff, mainbox, &received_count );
-      strcpy( inputbuff, "" );
+      if( inputbuff[0] != '/' )
+        strcpy( inputbuff, "" );
+      else
+      {
+        // there should be some verification here, but for the scope of this project this is ample
+        if( !strcmp( inputbuff, "/disconnected" ) )
+          break;
+      }
     }
 
     wrefresh( mainbox );
@@ -249,20 +251,18 @@ void runCLI( )
   }
   while( ( c = getch( ) ) );
 
-  // if we somehow get out here
 
+  //cleanup
+  delwin(mainbox);
+  delwin(input);
+
+  endcli( );
 } 
 
 void finish(int sig)
 {
   // for the love of god this may break at any moment
   strcpy(inputbuff, "Please use /quit, /part, /exit to cleanly exit.");
-
-  //pthread_exit( NULL );
-
-  /* do your non-curses wrapup here */
-
-  //exit(0);
 }
 
 void draw_borders(WINDOW *screen) {

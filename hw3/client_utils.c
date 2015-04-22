@@ -5,6 +5,7 @@
  * Billy Rhoades
 */
 #include "client.h"
+#include "client_utils.h"
 
 void get_message( const char* msg, WINDOW* mainbox, int* cnt )
 {
@@ -21,8 +22,14 @@ void get_message( const char* msg, WINDOW* mainbox, int* cnt )
   //FIXME: word wrap
 }
 
-void signalhandler(const int sig)
+void endclisig(const int sig)
 {
-	//YA.... We're just gonna do nothing here....
-	
+  endcli( );	
+}
+
+inline void endcli( )
+{
+  endwin();
+
+  exit( 0 );
 }

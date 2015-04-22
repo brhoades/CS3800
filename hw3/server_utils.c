@@ -98,7 +98,7 @@ inline void client_quit( const int clientNum )
 
 void signalhandler( const int sig )
 {
-  printf( "\nExiting in 10 seconds\n" )  ;
+  printf( "\nExiting in 10 seconds\n" );
   dispatch( -1, "SHUTDOWN: The server will shutdown in 10 seconds!" );
 
   pthread_mutex_lock( &meta_lock );
@@ -110,6 +110,7 @@ void signalhandler( const int sig )
       pthread_mutex_unlock( &meta_lock );
       client_quit( i );
       pthread_mutex_lock( &meta_lock );
+      write_client( sockets[i], "/disconnected" );
       pthread_kill( threads[i], SIGINT );
     }
   }
