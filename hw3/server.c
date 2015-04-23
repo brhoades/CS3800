@@ -65,6 +65,7 @@ void *handleClient( void * packed )
   }
 
   client_quit( clientNum );
+  closeSocket( );
   pthread_exit( NULL );
   return NULL;
 }

@@ -109,7 +109,7 @@ void runCLI( )
   // get our maximum window dimensions
   getmaxyx(stdscr, parent_y, parent_x);
   // set up initial windows
-  WINDOW *mainbox = newwin(parent_y - score_size-2, parent_x-1, 1, 1); // we are off by one to allow borders outside of our window
+  WINDOW *mainbox = newwin(parent_y - score_size-2, parent_x-2, 1, 1); // we are off by one to allow borders outside of our window
   // this allows us to overflow and scroll while keeping the border
   draw_borders_outside(parent_y - score_size, parent_x);
   mvprintw( 0, TITLE_START, "Chat" );
