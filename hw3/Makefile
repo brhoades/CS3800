@@ -1,5 +1,5 @@
 CXX=/usr/bin/clang
-CFLAGS=-lcurses -lform -lnsl -g -Wall
+CFLAGS=-lcurses -w -lnsl -g 
 
 OBJECTS=client \
 				server_utils.o \

@@ -15,6 +15,7 @@ int sock;
 int main( )
 {
   // Ignore SIGPIPE for now.... causing termination
+  signal( SIGPIPE, SIG_IGN );
   signal( SIGINT, signalhandler );
 
   startup_accounting( );
